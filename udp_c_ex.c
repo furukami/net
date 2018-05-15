@@ -5,6 +5,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+void ErrorMT(char *str){
+	fprintf(stderr,"Faild to %s",str);
+	exit(1);
+}
+
 int main(int argc,char *argv[]){
 	int sock;
 	char *ipadd;
@@ -14,6 +19,7 @@ int main(int argc,char *argv[]){
 //	char buf[1024] = "hoge";
 	char buf[1024];
 	char rebuf[1024];
+	int rm;
 	int byte;
 	unsigned int len;
 
@@ -25,7 +31,11 @@ int main(int argc,char *argv[]){
 	ipadd = argv[1];
 	Portnum = atoi(argv[2]);
 	fprintf(stdout,"What do you sent word?\n");
-	fgets(buf,sizeof(buf),stdin);
+	if(fgets(buf,sizeof(buf),stdin) == NULL){
+		ErrorMT("input");
+		//fprintf(stderr,"Faild to input\n");
+	}
+	//sscanf(buf,"%s",buf);
 	
 	memset(&server,0,sizeof(server));
 	server.sin_family = AF_INET;
@@ -35,11 +45,26 @@ int main(int argc,char *argv[]){
 	server.sin_port = htons(Portnum);
 	byte = strlen(buf)+1;
 
-	sock = socket(AF_INET,SOCK_DGRAM,0);
-	sendto(sock,buf,byte,0,(struct sockaddr *)&server,sizeof(server));
-	recvfrom(sock,rebuf,1024,0,(struct sockaddr *)&client,&len);
-	printf("received %s",rebuf);
+	if((sock = socket(AF_INET,SOCK_DGRAM,0)) < 0){
+		ErrorMT("socket");
+	}
+	if(sendto(sock,buf,byte,0,(struct sockaddr *)&server,sizeof(server)) < 0){
+		ErrorMT("sent");
+	}
+	if((rm = recvfrom(sock,rebuf,1024,0,(struct sockaddr *)&client,&len)) < 0){
+		ErrorMT("reception");
+	}
+
+	printf("received %s\n",rebuf);
 	close(sock);
 
 	return 0;
 }
+/*
+16j5027@lin3441:~/Cnetwork$ ./client 160.194.128.163 5000
+What do you sent word?
+HOGEHOGE
+received hogehoge
+
+16j5027@lin3441:~/Cnetwork$
+*/

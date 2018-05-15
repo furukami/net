@@ -6,6 +6,11 @@
 #include<sys/socket.h>
 #include<netinet/in.h>
 
+void ErrorMT(char *str){
+	fprintf(stderr,"Falild to %s",str);
+	exit(1);
+}
+
 int main(int argc , char *argv[]){
 	int sock;
 	char *ipadd;
@@ -13,7 +18,10 @@ int main(int argc , char *argv[]){
 	struct sockaddr_in server;
 	struct sockaddr_in client;
 	char buf[1024];
+	char rebuf[1024];
+	int rm;
 	int byte;
+	int i;
 	unsigned int len;
 
 	if(argc != 3){
@@ -30,20 +38,28 @@ int main(int argc , char *argv[]){
 	//server.sin_port = htons(5000);
 	server.sin_port = htons(Portnum);
 
-	sock = socket(AF_INET,SOCK_DGRAM,0);
-	bind(sock,(struct sockaddr *)&server,sizeof(server));
+	if((sock = socket(AF_INET,SOCK_DGRAM,0)) < 0){
+		ErrorMT("socket");
+	}
+	if(bind(sock,(struct sockaddr *)&server,sizeof(server)) < 0){
+		ErrorMT("bind");
+	}
 
-	while(recvfrom(sock,buf,1024,0,(struct sockaddr *)&client,&len) >= 0){
+	while(rm = recvfrom(sock,buf,1024,0,(struct sockaddr *)&client,&len) >= 0){
 	//recvfrom(sock,buf,1024,0,(struct sockaddr *)&client,&len);
-		printf("received %s",buf);
-		int i = 0;
-		char rebuf[1024];
-		while(buf[i] != '\0'){
-			rebuf[i] = (char)tolower(*buf);
+		printf("received %s\n",buf);
+		i = 0;
+		char *p = buf;
+		while(*p != '\0'){
+			rebuf[i] = (char)tolower(*p);
 			i++;
+			p++;
 		}
 		byte = strlen(rebuf)+1;
-		sendto(sock,rebuf,byte,0,(struct sockaddr *)&client,sizeof(client));
+//		fprintf(stdout,"%s",rebuf);
+		if(sendto(sock,rebuf,byte,0,(struct sockaddr *)&client,sizeof(client)) < 0){
+			fprintf(stderr,"Not send\n");
+		}
 
 	}
 	close(sock);
