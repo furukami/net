@@ -7,7 +7,7 @@
 #include<netinet/in.h>
 
 void ErrorMT(char *str){
-	fprintf(stderr,"Falild to %s",str);
+	fprintf(stderr,"Falild to %s\n",str);
 	exit(1);
 }
 
@@ -24,7 +24,6 @@ int main(int argc , char *argv[]){
 	int i;
 	unsigned int len;
 	int s;
-	int s0;
 
 	if(argc != 3){
 		fprintf(stderr,"Uses : ./server IPaddress Portnumber\n");
@@ -50,15 +49,12 @@ int main(int argc , char *argv[]){
 	if(listen(sock,5) < 0){
 		ErrorMT("listen");
 	}
-
+	while(1){
 	if((s = accept(sock,(struct sockaddr *)&client,&len)) < 0){
 		ErrorMT("accept");
-	}
-		
-	printf("connected from '%s'\n",inet_ntoa(client.sin_addr));
-		
+	}	
 
-	if(rm = recv(s,buf,1024,0)){
+	if((rm = recv(s,buf,1024,0)) <= 0){
 		ErrorMT("recv");
 	}
 	printf("received %s\n",buf);
@@ -71,12 +67,14 @@ int main(int argc , char *argv[]){
 		}
 		byte = strlen(rebuf)+1;
 //		fprintf(stdout,"%s",rebuf);
-	if(send(sock,rebuf,byte,0) < 0){
-		fprintf(stderr,"Not send\n");
+	if(send(s,rebuf,byte,0) < 0){
+		ErrorMT("send");
 	}
 
-
-	close(sock);
+	}
+	if(close(sock) < 0){
+		ErrorMT("close");
+	}
 
 	return 0;
 }
