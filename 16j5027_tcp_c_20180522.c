@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 
 void ErrorMT(char *str){
-	fprintf(stderr,"Faild to %s",str);
+	fprintf(stderr,"Faild to %s\n",str);
 	exit(1);
 }
 
@@ -14,11 +14,13 @@ int main(int argc,char *argv[]){
 	int sock;
 	char *ipadd;
 	int Portnum;
+	int string_point = 0;
 	struct sockaddr_in server;
 	struct sockaddr_in client;
 //	char buf[1024] = "hoge";
 	char buf[1024];
 	char rebuf[1024];
+	char catch[1024];
 	int rm;
 	int byte;
 	unsigned int len;
@@ -31,9 +33,17 @@ int main(int argc,char *argv[]){
 	ipadd = argv[1];
 	Portnum = atoi(argv[2]);
 	fprintf(stdout,"What do you sent word?\n");
-	if(fgets(buf,sizeof(buf),stdin) == NULL){
+	if(fgets(catch,sizeof(buf),stdin) == NULL){
 		ErrorMT("input");
 		//fprintf(stderr,"Faild to input\n");
+	}
+	while(catch[string_point] != '\0'){
+		if(catch[string_point] == '\n'){
+			buf[string_point] = '\0';
+		}else{
+			buf[string_point] = catch[string_point];
+		}
+		string_point++;
 	}
 	//sscanf(buf,"%s",buf);
 	
@@ -48,7 +58,7 @@ int main(int argc,char *argv[]){
 	if((sock = socket(AF_INET,SOCK_STREAM,0)) < 0){
 		ErrorMT("socket");
 	}
-	if(connect(sock,(struct sockaddr *)server,sizeof(server)) < 0){
+	if(connect(sock,(struct sockaddr *)&server,sizeof(server)) < 0){
 		ErrorMT("connect");
 	}
 
@@ -56,7 +66,7 @@ int main(int argc,char *argv[]){
 	if(send(sock,buf,byte,0) < 0){
 		ErrorMT("sent");
 	}
-	if((rm = recvfrom(sock,rebuf,1024,0,(struct sockaddr *)&client,&len)) < 0){
+	if((rm = recv(sock,rebuf,1024,0)) < 0){
 		ErrorMT("reception");
 	}
 
