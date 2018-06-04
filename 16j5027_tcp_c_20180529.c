@@ -40,7 +40,7 @@ int main(int argc,char *argv[]){
 	if((sock = socket(AF_INET,SOCK_STREAM,0)) < 0){
 		ErrorMT("socket");
 	}
-	if(conn = connect(sock,(struct sockaddr *)&server,sizeof(server)) < 0){
+	if((conn = connect(sock,(struct sockaddr *)&server,sizeof(server))) < 0){
 		ErrorMT("connect");
 	}
 	while(1){
@@ -53,8 +53,8 @@ int main(int argc,char *argv[]){
 			ErrorMT("input");
 			//fprintf(stderr,"Faild to input\n");
 		}
-		if(buf[0] == '-'){
-			if(buf[1] == 'c'){
+		if(catch[0] == '-'){
+			if(catch[1] == 'c'){
 				break;
 			}
 		}
@@ -82,11 +82,3 @@ int main(int argc,char *argv[]){
 
 	return 0;
 }
-/*
-   16j5027@lin3441:~/Cnetwork$ ./client 160.194.128.163 5000
-   What do you sent word?
-   HOGEHOGE
-   received hogehoge
-
-   16j5027@lin3441:~/Cnetwork$
- */
