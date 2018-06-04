@@ -53,17 +53,21 @@ int main(int argc , char *argv[]){
 		}
 		while(1){
 			char buf[1024];
-			/*
+			if((memset(buf,(int)'\0',sizeof(rebuf))) == NULL){
+				ErrorMT("memset");
+			}
+			
 			if((rm = recv(s,buf,1024,0)) <= 0){
 				ErrorMT("recv");
 			}
-			*/
+			/*
 			for(i = 0;i < 1024;i++){
-				if(rm = recv(s,&buf[i],1,0) <= 0){
+				if((rm = recv(s,&buf[i],1,0) <= 0)){
 					printf("%c\n",buf[i]);
 					break;
 				}
 			}
+			*/
 			if(buf[0] == '-'){
 				if(buf[1] == 'c'){
 					close(s);
@@ -72,8 +76,10 @@ int main(int argc , char *argv[]){
 			printf("received %s\n",buf);
 			i = 0;
 			char *p = buf;
-			printf("%c\n",*p);
 			char rebuf[1024];
+			if((memset(rebuf,(int)'\0',sizeof(rebuf))) == NULL){
+				ErrorMT("memset");
+			}
 			while(*p != '\0'){
 				rebuf[i] = (char)tolower(*p);
 				i++;
@@ -84,6 +90,7 @@ int main(int argc , char *argv[]){
 			if(send(s,rebuf,byte,0) <= 0){
 				ErrorMT("send");
 			}
+			printf("%s\n",rebuf);
 		}
 
 	}
