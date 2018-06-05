@@ -53,11 +53,14 @@ int main(int argc , char *argv[]){
 		}
 		while(1){
 			char buf[1024];
+			char rebuf[1024];
 			if((memset(buf,(int)'\0',sizeof(rebuf))) == NULL){
 				ErrorMT("memset");
 			}
 			
 			if((rm = recv(s,buf,1024,0)) <= 0){
+			/*	close(s);
+				break;*/
 				ErrorMT("recv");
 			}
 			/*
@@ -71,12 +74,12 @@ int main(int argc , char *argv[]){
 			if(buf[0] == '-'){
 				if(buf[1] == 'c'){
 					close(s);
+					break;
 				}
 			}
 			printf("received %s\n",buf);
 			i = 0;
 			char *p = buf;
-			char rebuf[1024];
 			if((memset(rebuf,(int)'\0',sizeof(rebuf))) == NULL){
 				ErrorMT("memset");
 			}
@@ -88,6 +91,7 @@ int main(int argc , char *argv[]){
 			byte = strlen(rebuf)+1;
 			//		fprintf(stdout,"%s",rebuf);
 			if(send(s,rebuf,byte,0) <= 0){
+				break;
 				ErrorMT("send");
 			}
 			printf("%s\n",rebuf);
